@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { fs, layout, margin, setupHiDpiScene } from '../render/layout'
 import { Actor, FEET_Y } from '../game/Actor'
 import { ACTORS, textureKey, type ActorId } from '../game/actors'
+import { audio } from '../game/audio'
 import { goToScene, savedProgress } from '../game/GameFlow'
 import { CHAPTERS, FLAT } from '../game/story'
 import { ensureGendarmeTexture } from '../game/props'
@@ -54,6 +55,7 @@ export class TitleScene extends Phaser.Scene {
 
   create() {
     setupHiDpiScene(this)
+    audio.stopAll(900)
     ensureGendarmeTexture(this)
     buildHarborBackdrop(this, 'morning')
 
@@ -153,6 +155,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private async begin(index: number) {
+    audio.unlock()
     if (layout.touch && layout.portrait) void this.goFullscreen()
     goToScene(this, index)
   }

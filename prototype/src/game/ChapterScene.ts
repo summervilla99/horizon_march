@@ -6,6 +6,7 @@ import { Button, touchMin } from '../ui/Button'
 import { Panel } from '../ui/Panel'
 import { Actor, BAND_BOTTOM, BAND_TOP, FEET_Y } from './Actor'
 import { ACTORS, type ActorId } from './actors'
+import { audio, type Bgm } from './audio'
 import { goToScene, goToTitle, nextScene } from './GameFlow'
 import { CHAPTERS, FLAT } from './story'
 import type { StoryScene } from './script'
@@ -81,6 +82,10 @@ export class ChapterScene extends Phaser.Scene {
     kb.on('keydown-UP', () => this.tryJump())
     this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: unknown[]) => this.onTap(p, over))
 
+    audio.unlock()
+    if (this.def.bgm !== undefined) audio.bgm(this.def.bgm)
+    const stageSea: Partial<Record<string, number>> = { 'harbor-memory': 0.6, harbor: 0.18, deck: 0.18 }
+    audio.sea(this.def.sea ?? stageSea[this.def.stage] ?? 0)
     if (this.def.stage === 'harbor-memory') this.sepia(true, 0)
     this.buildMenuButton()
     this.cameras.main.fadeIn(550, 0, 0, 0)
@@ -216,6 +221,25 @@ export class ChapterScene extends Phaser.Scene {
       this.dialogue.onEnd = () => resolve(picked)
       this.dialogue.start(tree, 'q')
     })
+  }
+
+  // ---------------------------------------------------------------- sound
+
+  music(id: Bgm | null, ms = 1800) {
+    audio.bgm(id, ms)
+  }
+  sea(vol: number, ms = 1800) {
+    audio.sea(vol, ms)
+  }
+  horn() {
+    audio.horn()
+  }
+  /** Starts the 옥음방송 radio broadcast (music ducks away under it). */
+  broadcast() {
+    void audio.voice()
+  }
+  endBroadcast(ms = 2200) {
+    audio.fadeOutVoice(ms)
   }
 
   wait(ms: number) {
@@ -539,14 +563,26 @@ export class ChapterScene extends Phaser.Scene {
       }
     })
     mk('닫기', left + half + gap + half / 2, () => this.closeMenu(), '#3a2b2b', '#caa')
-    // title + the "title screen" shortcut sit on a third row to keep the buttons large
+    const muteBtn: Button = new Button(this, {
+      x: left + half / 2,
+      y: by + rowH * 1.5 + gap,
+      w: half,
+      h: rowH,
+      label: audio.muted ? '소리 켜기 🔈' : '소리 끄기 🔇',
+      fontPx: 14,
+      fill: '#2b2b3a',
+      stroke: '#9aa',
+      depth: MENU_DEPTH + 2,
+      onPress: () => muteBtn.setText(audio.toggleMute() ? '소리 켜기 🔈' : '소리 끄기 🔇'),
+    })
+    this.menuBtns.push(muteBtn)
     this.menuBtns.push(
       new Button(this, {
-        x: layout.viewW / 2,
+        x: left + half + gap + half / 2,
         y: by + rowH * 1.5 + gap,
-        w: gridW,
+        w: half,
         h: rowH,
-        label: '타이틀 화면으로',
+        label: '타이틀로',
         fontPx: 14,
         fill: '#2b2b3a',
         stroke: '#9aa',

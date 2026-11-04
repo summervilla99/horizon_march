@@ -3,6 +3,7 @@ import { fs, followCameraX, layout, margin, setupHiDpiScene } from '../render/la
 import { DialogueBox } from '../dialogue/DialogueBox'
 import { Actor, FEET_Y } from '../game/Actor'
 import { ACTORS, textureKey } from '../game/actors'
+import { audio } from '../game/audio'
 import { goToTitle, nextScene } from '../game/GameFlow'
 import { buildStreetBackdrop } from '../scenery/StreetBackdrop'
 import { Button, touchMin } from '../ui/Button'
@@ -61,6 +62,9 @@ export class RunnerScene extends Phaser.Scene {
     this.runner = new Actor(this, ACTORS.ganemura, 150)
     this.runner.setLabelVisible(true)
     this.addMenuButton()
+    audio.unlock()
+    audio.bgm('chulbyeong')
+    audio.sea(0)
     this.cameras.main.fadeIn(500, 0, 0, 0)
     void this.intro()
   }

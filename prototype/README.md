@@ -47,3 +47,9 @@ npm run build    # tsc + vite build → dist/
 
 - 캐릭터: 디자인 시트에서 추출한 컷아웃 (`tools/extract_characters.py`) + 노인/군복/친구 변형(`tools/make_variants.py`).
 - 배경/소품/헌병: 모두 Canvas 2D로 코드에서 그립니다 (`src/scenery/`, `src/game/props.ts`).
+
+## 사운드
+
+`src/assets/audio/` (QLab 음원을 웹용 mp3로 재인코딩, 총 16MB). `src/game/audio.ts` 가 `<audio>` 스트리밍 + WebAudio 게인으로 페이드/크로스페이드 처리합니다.
+바다 소리(1장 시작) → 싸움 뒤 **대판이다** → 청옥/아키코 등장 때 해당 곡 → 출병(8~9장) → **옥음방송**(종전 장면, "전쟁이 끝났어!"에서 페이드아웃) → **ED**(청옥 등장~피날레). 배 고동은 배 위·출항 장면 시작에.
+각 장면 정의의 `bgm` / `sea` 값이 장면 시작 음악을 정하므로 ☰ 메뉴로 장 이동해도 맞는 음악이 나옵니다. ☰ 메뉴에 소리 켜기/끄기 버튼이 있습니다.

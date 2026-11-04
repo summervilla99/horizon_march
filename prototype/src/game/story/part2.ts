@@ -12,6 +12,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'chicken',
         stage: 'street-day',
+        bgm: 'daepan',
         async play(s) {
           const y = s.put('yasuda', 0.3, { face: 'right' })
           const g = s.put('ganemura', 1.1, { face: 'left' })
@@ -32,6 +33,7 @@ export const part2: ChapterDef[] = [
           g.face('left')
           k.face('left')
           sj.face('left')
+          s.music('akiko', 1500)
           await s.enter('akiko', 0.4, 'left', { speed: 150 })
           await s.talk([
             ['아키코', '네? 아, 안녕하세요. 방금 목소리가 되게 많이 들린 것 같은데.'],
@@ -83,6 +85,7 @@ export const part2: ChapterDef[] = [
           void s.exit('akiko', 'left', 150)
           void s.exit('masayo', 'left', 170)
           await s.exit('megumi', 'left', 170)
+          s.music('daepan', 1800)
           y.face('right')
           await Promise.all([g, k, sj].map((p) => p.walkTo(s.fx(0.7), 200)))
           await s.talk([
@@ -118,6 +121,7 @@ export const part2: ChapterDef[] = [
           ])
           // a hopeful beat: the girls pass by waving — answer them as loudly as you can
           y.face('right')
+          s.music('akiko', 1500)
           const a2 = s.put('akiko', -80, { abs: true, face: 'right' })
           const m2 = s.put('masayo', -130, { abs: true, face: 'right', lane: 470 })
           const g2 = s.put('megumi', -180, { abs: true, face: 'right', lane: 440 })
@@ -154,6 +158,7 @@ export const part2: ChapterDef[] = [
           void s.exit('akiko', 'right', 150)
           void s.exit('masayo', 'right', 160)
           await s.exit('megumi', 'right', 160)
+          s.music('daepan', 1800)
           s.sepia(true, 1200)
           await s.talk([
             ['야스다', '아무것도 없는 제주도에 있을 땐 일본이 멋진 나라라는 말을 듣고 동경했어. 처음으로 만난 일본은 활기가 넘치고, 모든 게 눈부셨어.'],
@@ -175,6 +180,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'sake',
         stage: 'interior-day',
+        bgm: 'cheongok',
         async play(s) {
           const c = s.put('cheongok', 0.66, { face: 'left' })
           const y = s.put('yasuda', -80, { abs: true, face: 'right' })
@@ -238,6 +244,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'crisis',
         stage: 'interior-night',
+        bgm: 'daepan',
         async play(s) {
           await s.caption('전환. 강성의 집. 가네무라, 강성, 순주 모여있다.', 2200)
           s.put('ganemura', 0.28, { face: 'right' })
@@ -250,6 +257,7 @@ export const part2: ChapterDef[] = [
             ['강성', '내가 맡아줄게.'],
             ['순주', '계속해도 소용없는 전쟁인데... 이제 와서 또 끌려가다니....'],
           ])
+          s.music('chulbyeong', 1200)
           const y = await s.enter('yasudaArmy', 0.86, 'right', { speed: 200 })
           y.face('left')
           void y.hop(20, 220)
@@ -283,7 +291,7 @@ export const part2: ChapterDef[] = [
           await s.say('가네무라', '들켰어! 먼저 간다!')
         },
       },
-      { kind: 'runner', id: 'ganemura-run' },
+      { kind: 'runner', id: 'ganemura-run', bgm: 'chulbyeong' },
     ],
   },
   // ------------------------------------------------------------------------------------------ 9
@@ -296,6 +304,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'akiko-farewell',
         stage: 'interior-night',
+        bgm: 'chulbyeong',
         async play(s) {
           await s.caption('아키코의 집. 아키코와 마사요, 메구미가 라디오를 듣고 있다.', 2400)
           const a = s.put('akiko', 0.3, { face: 'right' })
@@ -365,6 +374,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'night-walk',
         stage: 'street-night',
+        bgm: 'chulbyeong',
         world: 1.8,
         async play(s) {
           const y = s.put('yasudaArmy', 0.1, { face: 'right' })
@@ -418,8 +428,10 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'harbor-farewell',
         stage: 'harbor',
+        bgm: 'chulbyeong',
         async play(s) {
           await s.card('다음날 아침', '항구', 1900)
+          s.horn()
           // Yasuda stands on the ship's deck, high up and a little small
           const y = s.put('yasudaArmy', 0.78, { face: 'left', lane: 372 })
           y.scaleMul = 0.78
@@ -485,6 +497,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'radio',
         stage: 'harbor',
+        bgm: 'chulbyeong',
         async play(s) {
           const y = s.put('yasudaArmy', 0.78, { face: 'left', lane: 372 })
           y.scaleMul = 0.78
@@ -492,21 +505,27 @@ export const part2: ChapterDef[] = [
           const k = s.put('gangseong', 0.28, { face: 'right', lane: 470 })
           const sj = s.put('sunju', 0.4, { face: 'right', lane: 484 })
           void y
-          await s.caption('잠시 후. 항구에 울려 퍼지는 라디오의 목소리 — 천황의 방송.', 3000)
+          // the broadcast starts and keeps playing under the whole exchange; it fades out on "전쟁이 끝났어!"
+          s.broadcast()
+          await s.caption('잠시 후. 항구에 울려 퍼지는 라디오의 목소리 — 천황의 방송.', 3200)
           s.shakeCam(400, 0.004)
-          await s.caption('네 사람은 그때까지의 공기의 차이를 알아차린다.', 2000)
+          await s.caption('네 사람은 그때까지의 공기의 차이를 알아차린다.', 2600)
+          await s.wait(2500)
           await s.talk([
             ['야스다', '저기, 지금 무슨 얘길 하고 있는 건가요?'],
             ['가네무라', '저기요, 저희들은 일본어를 잘 못하는데, 무슨 뜻인가요?'],
             ['야스다', '저기 아저씨, 울지 말고 좀 말해줘!'],
-            ['순주', '전쟁이 끝났어! 전쟁이 끝났다고!'],
           ])
+          await s.wait(1500)
+          await s.say('순주', '전쟁이 끝났어! 전쟁이 끝났다고!')
+          s.endBroadcast(2500)
           await s.caption('잠시간의 사이.', 1400)
           await Promise.all([g.jump(60, 460), k.jump(70, 480), sj.jump(80, 500)])
           s.confetti(2500)
           await s.say('', '세 사람, 환호하며 입모양으로 야스다에게 "내려와라!"라고 외친다.')
           await s.say('야스다', '기다려! 지금 내려갈 테니까!')
           await s.caption('야스다, 예전에 희망을 품고 배에서 내렸던 그날처럼 달려가려고 한다. 그때 —', 3000)
+          s.music('ed', 2500)
           const c = await s.enter('cheongok', 0.58, 'right', { speed: 420, lane: 500 })
           c.face('left')
           s.shakeCam(300, 0.01)
@@ -530,6 +549,7 @@ export const part2: ChapterDef[] = [
         kind: 'story',
         id: 'finale',
         stage: 'harbor',
+        bgm: 'ed',
         async play(s) {
           const cast = [
             ['yasuda', 0.22], ['ganemura', 0.32], ['gangseong', 0.42], ['sunju', 0.52],

@@ -12,6 +12,8 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'pier-1990',
         stage: 'harbor-memory',
+        bgm: null,
+        sea: 0.6,
         async play(s) {
           const ya = s.put('yasudaOld', 0.36, { face: 'right' })
           const ga = s.put('ganemuraOld', 0.6, { face: 'left' })
@@ -63,6 +65,8 @@ export const part1: ChapterDef[] = [
           await s.caption('두 노인은 실랑이를 하다 싸움 자세를 취한다.', 2200)
           s.flash(0xfff6dc, 700)
           s.sepia(false, 900)
+          s.sea(0.18, 2500)
+          s.music('daepan', 2200)
           await s.wait(500)
         },
       },
@@ -78,8 +82,10 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'deck',
         stage: 'deck',
+        bgm: 'daepan',
         async play(s) {
           await s.card('60년 전', '시대는 1930년대 후반', 1100)
+          s.horn()
           const y = s.put('yasuda', 0.3, { face: 'right', lane: 470 })
           const g = s.put('ganemura', 0.46, { face: 'left', lane: 470 })
           void Promise.all([y.shake(5, 500), g.shake(5, 500)])
@@ -117,12 +123,14 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'dock-drum',
         stage: 'harbor',
+        bgm: 'daepan',
         async play(s) {
           const y = s.put('yasuda', 0.2, { face: 'right' })
           const g = s.put('ganemura', 0.32, { face: 'right', lane: 475 })
           const gs = s.put('gangseong', 0.44, { face: 'right', lane: 440 })
           const sj = s.put('sunju', 0.55, { face: 'right', lane: 468 })
           await s.caption('네 사람이 공기를 만끽하려 할 때-', 1800)
+          s.music('cheongok', 900)
           const c = await s.enter('cheongok', 0.9, 'right', { speed: 150 })
           c.face('left')
           await s.say('청옥', '기반아!!')
@@ -144,6 +152,7 @@ export const part1: ChapterDef[] = [
           const r = await s.drum({ leader: y, drummer: c, victims: [g, gs, sj] })
           if (r.dodged >= Math.ceil(r.total * 0.6)) await s.say('야스다', '하하! 이번엔 안 맞았다! ...앗, 다들 쓰러졌네.')
           else await s.say('야스다', '으윽... 이 여자, 북이 무기야...!')
+          s.music('daepan', 1500)
           await s.say('야스다', '도망쳐!')
           await Promise.all([y, g, gs, sj].map((a) => a.hop(34, 260)))
         },
@@ -152,6 +161,7 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'osaka-run',
         stage: 'street-day',
+        bgm: 'daepan',
         world: 3.2,
         async play(s) {
           const ids = ['yasuda', 'ganemura', 'gangseong', 'sunju'] as const
@@ -182,12 +192,14 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'akiko-sugar',
         stage: 'street-day',
+        bgm: 'daepan',
         async play(s) {
           await s.card('1940년대', '어느 집 앞', 1900)
           const y = s.put('yasuda', 0.2, { face: 'right' })
           await y.walkTo(s.fx(0.38), 150)
           await s.say('야스다', '저기요, 실례합니다. 실례합니다!')
           await s.caption('야스다, 조금 긴장하고 있다. 집 안에서 아키코가 나온다.', 1800)
+          s.music('akiko', 1500)
           const a = await s.enter('akiko', 0.62, 'right', { speed: 120 })
           a.face('left')
           await s.talk([
@@ -289,6 +301,7 @@ export const part1: ChapterDef[] = [
             ['야스다(노)', '벚꽃나무도 초록빛으로 물들었네. 일본에 와서 벚꽃이 흩날리는 것을 몇 번이나 보았을까. 일본 성으로 바꾸지 않으면 안된다고 해서, 잘 모르는 채로 아는 야스다 가문의 성을 따라서 야스다라고 지었지. 야스다 모토노리.'],
           ])
           s.sepia(false, 900)
+          s.music('daepan', 2000)
         },
       },
     ],
@@ -303,11 +316,13 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'rice-sunju',
         stage: 'street-day',
+        bgm: 'daepan',
         async play(s) {
           const y = s.put('yasuda', 0.5, { face: 'right' })
           await s.say('야스다', '고향은 어떻게 되어가고 있을까. 일본이 지면 고향은 어떻게 되는 거지...')
           await s.caption('야스다, 청옥의 집 앞을 지나간다.', 1500)
           const c = s.put('cheongok', 1.2, { face: 'left' })
+          s.music('cheongok', 900)
           await c.walkTo(s.fx(0.74), 330)
           void c.hop(20, 200)
           s.shakeCam(240, 0.006)
@@ -325,6 +340,7 @@ export const part1: ChapterDef[] = [
           }
           c.face('right')
           await s.exit('cheongok', 'right', 140)
+          s.music('daepan', 1800)
           y.face('right')
           await s.talk([
             ['야스다', '깜짝 놀랐어! 무서웠어! 언제까지 쫓아다닐 생각이지?'],
@@ -364,6 +380,7 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'gangseong-house',
         stage: 'interior-day',
+        bgm: 'daepan',
         async play(s) {
           s.put('ganemura', 0.3, { face: 'right' })
           const k = s.put('gangseong', 0.58, { face: 'left' })
@@ -409,6 +426,7 @@ export const part1: ChapterDef[] = [
         kind: 'story',
         id: 'cheongok-door',
         stage: 'street-day',
+        bgm: 'cheongok',
         async play(s) {
           const c = s.put('cheongok', 0.72, { face: 'left' })
           const y = s.put('yasuda', -120, { abs: true, face: 'right' })
