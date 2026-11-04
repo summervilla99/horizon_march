@@ -1,18 +1,21 @@
 import './style.css'
 import Phaser from 'phaser'
-import { PrologueScene } from './scenes/PrologueScene'
-import { Ch5EnlistmentScene } from './scenes/Ch5EnlistmentScene'
+import { TitleScene } from './scenes/TitleScene'
+import { RunnerScene } from './scenes/RunnerScene'
+import { ChapterScene } from './game/ChapterScene'
 import {
   applyLayout,
   computeLayout,
   layout,
   layoutChangedEnough,
   purgeLayoutTextures,
+  readSafeInsets,
   RENDER_SCALE,
 } from './render/layout'
 
 const stageEl = document.getElementById('stage')!
-applyLayout(computeLayout(stageEl.clientWidth, stageEl.clientHeight))
+const measure = () => computeLayout(stageEl.clientWidth, stageEl.clientHeight, readSafeInsets())
+applyLayout(measure())
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -39,7 +42,7 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [PrologueScene, Ch5EnlistmentScene],
+  scene: [TitleScene, ChapterScene, RunnerScene],
 }
 
 const game = new Phaser.Game(config)
@@ -51,7 +54,8 @@ const game = new Phaser.Game(config)
  * mobile address bar sliding away, are left to Phaser's FIT letterboxing.
  */
 function relayout() {
-  const next = computeLayout(stageEl.clientWidth, stageEl.clientHeight)
+  const next = measure()
+  updateRotateHint(next.portrait)
   if (!layoutChangedEnough(next)) return
   applyLayout(next)
   game.scale.setGameSize(layout.viewW * RENDER_SCALE, layout.viewH * RENDER_SCALE)
@@ -63,6 +67,18 @@ function relayout() {
     scene.scene.restart(data)
   }
 }
+
+// phones held upright get a dismissible nudge to rotate; the layout works either way
+const hintEl = document.getElementById('rotate-hint')
+let hintDismissed = false
+hintEl?.querySelector('button')?.addEventListener('click', () => {
+  hintDismissed = true
+  hintEl.classList.remove('show')
+})
+function updateRotateHint(portrait: boolean) {
+  hintEl?.classList.toggle('show', portrait && layout.touch && !hintDismissed)
+}
+updateRotateHint(layout.portrait)
 
 let resizeTimer: number | undefined
 const scheduleRelayout = () => {

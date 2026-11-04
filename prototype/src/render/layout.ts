@@ -15,7 +15,7 @@ export const RENDER_SCALE = 2
 export const STAGE_H = 540
 
 const PORTRAIT_W = 480
-const MAX_LANDSCAPE_W = 1170
+const MAX_LANDSCAPE_W = 1300
 const MAX_PORTRAIT_H = 1100
 const STREET_HORIZON_Y = 400
 
@@ -30,6 +30,11 @@ export interface Layout {
   /** world y at the bottom edge of the view */
   worldBottom: number
   touch: boolean
+  /** notch / home-indicator insets, in logical units — backdrops bleed under them, UI stays clear */
+  safeL: number
+  safeR: number
+  safeT: number
+  safeB: number
 }
 
 export const layout: Layout = {
@@ -40,13 +45,42 @@ export const layout: Layout = {
   camY: 0,
   worldBottom: STAGE_H,
   touch: false,
+  safeL: 0,
+  safeR: 0,
+  safeT: 0,
+  safeB: 0,
 }
 
 export function detectTouch(): boolean {
   return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0
 }
 
-export function computeLayout(stageW: number, stageH: number): Layout {
+export interface SafeInsets {
+  l: number
+  r: number
+  t: number
+  b: number
+}
+
+/** CSS px of notch / home-indicator padding, read from env(safe-area-inset-*). */
+export function readSafeInsets(): SafeInsets {
+  const probe = document.createElement('div')
+  probe.style.cssText =
+    'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;' +
+    'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)'
+  document.body.appendChild(probe)
+  const cs = getComputedStyle(probe)
+  const insets = {
+    t: parseFloat(cs.paddingTop) || 0,
+    r: parseFloat(cs.paddingRight) || 0,
+    b: parseFloat(cs.paddingBottom) || 0,
+    l: parseFloat(cs.paddingLeft) || 0,
+  }
+  probe.remove()
+  return insets
+}
+
+export function computeLayout(stageW: number, stageH: number, safe: SafeInsets = { l: 0, r: 0, t: 0, b: 0 }): Layout {
   const aspect = stageW / Math.max(1, stageH)
   let viewW: number
   let viewH: number
@@ -70,7 +104,16 @@ export function computeLayout(stageW: number, stageH: number): Layout {
     camY,
     worldBottom: camY + viewH,
     touch: detectTouch(),
+    safeL: Math.round(safe.l / cssScale),
+    safeR: Math.round(safe.r / cssScale),
+    safeT: Math.round(safe.t / cssScale),
+    safeB: Math.round(safe.b / cssScale),
   }
+}
+
+/** Standard HUD margin from the screen edge (logical units), already clear of notches. */
+export function margin() {
+  return Math.round(14 * layout.uiScale)
 }
 
 export function applyLayout(next: Layout) {

@@ -23,11 +23,13 @@ BOXES = {
     'gangseong': (800, 84, 1004, 600),
     'sunju': (1008, 120, 1188, 600),
     'akiko': (1186, 92, 1385, 600),
+    # 군복 변형 (시트 좌하단의 작은 전신 일러스트 — 원본이 작아서 업스케일됨)
+    'yasuda_army': (300, 892, 384, 1086),
 }
 
 # enclosed paper pockets: tolerance per character, kept below the distance between
 # that character's lightest clothing and the paper so cream blouses/aprons survive
-POCKET_TOL = {'akiko': 20, 'sunju': 22, 'cheongok': 30, 'yasuda': 62, 'ganemura': 62, 'gangseong': 40}
+POCKET_TOL = {'akiko': 20, 'sunju': 22, 'cheongok': 30, 'yasuda': 62, 'ganemura': 62, 'gangseong': 40, 'yasuda_army': 36}
 # border flood-fill tolerance: cream blouses with faint ink outlines need a tight value or the
 # fill leaks through the outline and eats the sleeve
 FLOOD_TOL = {'akiko': 30, 'sunju': 34}

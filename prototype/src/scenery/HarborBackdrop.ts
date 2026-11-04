@@ -2,15 +2,66 @@ import Phaser from 'phaser'
 import { layout, RENDER_SCALE, STAGE_H, worldToScreenY } from '../render/layout'
 import { mix, paintLayer, paintTexture, range, rgba, rng, softGlow, vGradient, type Ctx } from './paint/canvas'
 import { buildClouds, buildDust, buildSky, buildSunRays, buildVignette } from './paint/atmosphere'
+import type { Stops } from './paint/canvas'
 
-const HORIZON = 300
-const PIER_Y = 392
+export const HORIZON = 300
+export const PIER_Y = 392
 
-const SUN_Y = 236
+export type HarborLook = 'morning' | 'memory'
+
+interface LookDef {
+  sky: Stops
+  sunY: number
+  sun: { core: string; glow: string }
+  cloud: { light: string; shade: string; alpha: number }
+  shore: [string, string]
+  sea: [string, string, string]
+  ship: boolean
+  rays: string
+  vignette: [string, number]
+}
+
+/** morning = the 1930s arrival / 1945 send-off; memory = the old men's 1990s dusk (shown under a sepia wash). */
+const LOOKS: Record<HarborLook, LookDef> = {
+  morning: {
+    sky: [
+      [0, '#7ea5cf'],
+      [0.38, '#c9c6d2'],
+      [0.62, '#f3cfae'],
+      [1, '#f7b47e'],
+    ],
+    sunY: 236,
+    sun: { core: '#fff7e4', glow: '#ffc98a' },
+    cloud: { light: '#fff3e6', shade: '#d4968a', alpha: 0.92 },
+    shore: ['#a99ab4', '#efcdb1'],
+    sea: ['#c8c4cb', '#a7b4c3', '#5e819d'],
+    ship: true,
+    rays: '#ffe2b8',
+    vignette: ['#3a2010', 0.3],
+  },
+  memory: {
+    sky: [
+      [0, '#4f6483'],
+      [0.4, '#8a8fa3'],
+      [0.7, '#d2ad8b'],
+      [1, '#ea9f68'],
+    ],
+    sunY: 268,
+    sun: { core: '#ffe9c8', glow: '#ff9d62' },
+    cloud: { light: '#e9d3c3', shade: '#8f7889', alpha: 0.85 },
+    shore: ['#7d7490', '#d0aa8e'],
+    sea: ['#b19f9d', '#7f8a9c', '#3d556f'],
+    ship: false,
+    rays: '#ffc890',
+    vignette: ['#1f1208', 0.4],
+  },
+}
+
+let L: LookDef = LOOKS.morning
 
 /** x-anchors that depend on view width, so the composition holds from a 480 portrait to a 1170 wide view */
 const G = { W: 960, sunX: 230, shipX0: 470, shipX1: 1010, craneX: 88 }
-function setGeo(W: number) {
+export function setHarborGeo(W: number) {
   G.W = W
   G.sunX = W * 0.24
   G.shipX1 = W + 40 // the ship runs off the right edge
@@ -22,42 +73,38 @@ function setGeo(W: number) {
  * Ch.5 harbour at morning ("아침. 항구" in the script). A single-screen set, so every
  * layer is exactly one view wide and nothing needs to scroll.
  */
-export function buildHarborBackdrop(scene: Phaser.Scene) {
-  const name = 'harbor-morning'
+export function buildHarborBackdrop(scene: Phaser.Scene, look: HarborLook = 'morning') {
+  const name = `harbor-${look}`
   const w = layout.viewW
-  setGeo(w)
+  L = LOOKS[look]
+  setHarborGeo(w)
 
   buildSky(
     scene,
     name,
     w,
     {
-      stops: [
-        [0, '#7ea5cf'],
-        [0.38, '#c9c6d2'],
-        [0.62, '#f3cfae'],
-        [1, '#f7b47e'],
-      ],
-      sun: { fx: 0.24, y: worldToScreenY(SUN_Y), radius: 40, core: '#fff7e4', glow: '#ffc98a' },
+      stops: L.sky,
+      sun: { fx: 0.24, y: worldToScreenY(L.sunY), radius: 40, core: L.sun.core, glow: L.sun.glow },
     },
     HORIZON,
   )
-  buildClouds(scene, name, w, { light: '#fff3e6', shade: '#d4968a', alpha: 0.92, density: 5.2 }, 5, HORIZON)
+  buildClouds(scene, name, w, { ...L.cloud, density: 5.2 }, 5, HORIZON)
 
   // a single-screen set: the camera never scrolls sideways, so these are plain world layers
   paintLayer(scene, `${name}-far`, w, STAGE_H, (ctx) => paintFarShore(ctx, w), { scrollFactor: 1, depth: -92 })
   paintLayer(scene, `${name}-sea`, w, STAGE_H, (ctx) => paintSea(ctx, w), { scrollFactor: 1, depth: -88 })
   addSeaGlints(scene)
-  paintLayer(scene, `${name}-ship`, w, STAGE_H, (ctx) => paintShipAndCranes(ctx), { scrollFactor: 1, depth: -70 })
-  addFunnelSmoke(scene)
+  paintLayer(scene, `${name}-ship`, w, STAGE_H, (ctx) => paintShipAndCranes(ctx, L.ship), { scrollFactor: 1, depth: -70 })
+  if (L.ship) addFunnelSmoke(scene)
   // runs from the top of the stage to the bottom of the view; props (crates, bollards) rise above the deck line
   paintLayer(scene, `${name}-pier`, w, layout.worldBottom, (ctx) => paintPier(ctx, w), { scrollFactor: 1, depth: -10 })
   addGulls(scene)
   addMist(scene)
 
-  buildSunRays(scene, name, '#ffe2b8', 0.13)
+  buildSunRays(scene, name, L.rays, 0.13)
   buildDust(scene, 0xffe8c8, 18, w)
-  buildVignette(scene, name, '#3a2010', 0.3)
+  buildVignette(scene, name, L.vignette[0], L.vignette[1])
 }
 
 function paintFarShore(ctx: Ctx, w: number) {
@@ -71,8 +118,8 @@ function paintFarShore(ctx: Ctx, w: number) {
   ctx.lineTo(w, HORIZON + 2)
   ctx.closePath()
   const g = ctx.createLinearGradient(0, HORIZON - 70, 0, HORIZON)
-  g.addColorStop(0, '#a99ab4')
-  g.addColorStop(1, '#efcdb1')
+  g.addColorStop(0, L.shore[0])
+  g.addColorStop(1, L.shore[1])
   ctx.fillStyle = g
   ctx.fill()
 
@@ -95,9 +142,9 @@ function paintFarShore(ctx: Ctx, w: number) {
 
 function paintSea(ctx: Ctx, w: number) {
   vGradient(ctx, 0, HORIZON, w, PIER_Y - HORIZON + 4, [
-    [0, '#c8c4cb'],
-    [0.25, '#a7b4c3'],
-    [1, '#5e819d'],
+    [0, L.sea[0]],
+    [0.25, L.sea[1]],
+    [1, L.sea[2]],
   ])
   const r = rng(77)
   // wave strokes, longer and further apart toward the viewer
@@ -145,7 +192,7 @@ function addSeaGlints(scene: Phaser.Scene) {
   }
 }
 
-function paintShipAndCranes(ctx: Ctx) {
+function paintShipAndCranes(ctx: Ctx, withShip: boolean) {
   // lattice crane on the left quay
   const cx = G.craneX
   ctx.strokeStyle = '#5a4c48'
@@ -179,6 +226,28 @@ function paintShipAndCranes(ctx: Ctx) {
   ctx.stroke()
   ctx.fillStyle = '#5a4c48'
   ctx.fillRect(cx + 134, 250, 12, 9)
+
+  if (!withShip) {
+    // the 1990s: no troopship — a couple of small fishing boats out on the water instead
+    for (const [bx, by, bs] of [
+      [G.W * 0.62, PIER_Y - 52, 1],
+      [G.W * 0.82, PIER_Y - 30, 1.35],
+    ] as const) {
+      ctx.fillStyle = '#3b3f4d'
+      ctx.beginPath()
+      ctx.moveTo(bx - 34 * bs, by)
+      ctx.lineTo(bx + 38 * bs, by)
+      ctx.lineTo(bx + 26 * bs, by + 12 * bs)
+      ctx.lineTo(bx - 24 * bs, by + 12 * bs)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillRect(bx - 6 * bs, by - 22 * bs, 14 * bs, 22 * bs)
+      ctx.fillRect(bx + 14 * bs, by - 34 * bs, 2 * bs, 34 * bs)
+      ctx.fillStyle = rgba('#ffd9a8', 0.45)
+      ctx.fillRect(bx - 34 * bs, by, 70 * bs, 1.4)
+    }
+    return
+  }
 
   // troop transport moored along the pier
   const x0 = G.shipX0
@@ -382,7 +451,7 @@ function paintPier(ctx: Ctx, w: number) {
   }
 }
 
-function addGulls(scene: Phaser.Scene) {
+export function addGulls(scene: Phaser.Scene) {
   const key = paintTexture(scene, 'gull', 40, 16, (ctx) => {
     ctx.strokeStyle = '#fbf6ee'
     ctx.lineWidth = 2.4
@@ -416,7 +485,7 @@ function addGulls(scene: Phaser.Scene) {
   }
 }
 
-function addMist(scene: Phaser.Scene) {
+export function addMist(scene: Phaser.Scene) {
   const key = paintTexture(scene, 'harbor-mist', 600, 60, (ctx) => {
     ctx.save()
     ctx.translate(300, 30)

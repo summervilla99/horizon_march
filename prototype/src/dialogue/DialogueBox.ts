@@ -38,6 +38,10 @@ export class DialogueBox {
 
   /** Called once the conversation reaches a node with no `next` and no `choices`. */
   public onEnd?: () => void
+  /** Called with the index of the chosen option when a choice's `next` is the empty string. */
+  /** Called whenever a line starts (so the stage can make the speaker nod). */
+  public onLine?: (speaker: string, text: string) => void
+  public onChoice?: (index: number) => void
 
   private scene: Phaser.Scene
 
@@ -78,6 +82,19 @@ export class DialogueBox {
     })
   }
 
+  /** Plays [speaker, text] pairs as one conversation and resolves when it ends. */
+  play(lines: ReadonlyArray<readonly [string, string]>): Promise<void> {
+    if (!lines.length) return Promise.resolve()
+    const tree: DialogueTree = {}
+    lines.forEach(([speaker, text], i) => {
+      tree[`l${i}`] = { id: `l${i}`, speaker, text, next: i < lines.length - 1 ? `l${i + 1}` : undefined }
+    })
+    return new Promise((resolve) => {
+      this.onEnd = () => resolve()
+      this.start(tree, 'l0')
+    })
+  }
+
   isActive(): boolean {
     return this.active
   }
@@ -108,6 +125,8 @@ export class DialogueBox {
     this.continuePrompt.setVisible(false)
 
     this.nameText.setText(node.speaker)
+    this.onLine?.(node.speaker, node.text)
+    this.nameText.setColor(node.speaker ? '#ffd37a' : '#9fb0e0')
     this.fullText = node.text
     this.layoutForNode(node.text, node.choices?.length ?? 0)
     this.bodyText.setText('')
@@ -236,6 +255,11 @@ export class DialogueBox {
     const node = this.tree && this.currentId ? this.tree[this.currentId] : undefined
     const choice = node?.choices?.[index]
     if (!choice) return
+    if (!choice.next) {
+      this.onChoice?.(index)
+      this.end()
+      return
+    }
     this.currentId = choice.next
     this.renderCurrentNode()
   }

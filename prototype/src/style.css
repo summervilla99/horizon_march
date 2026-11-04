@@ -35,13 +35,54 @@ body {
   }
 }
 
-/* Phaser fits the canvas inside this box; keep it clear of notches and the home indicator */
+/* the canvas fills the whole screen (backdrops bleed under the notch); the game keeps its UI clear of
+   the safe-area insets itself — see layout.safe* */
 #stage {
   position: absolute;
-  top: env(safe-area-inset-top, 0px);
-  right: env(safe-area-inset-right, 0px);
-  bottom: env(safe-area-inset-bottom, 0px);
-  left: env(safe-area-inset-left, 0px);
+  inset: 0;
+}
+
+/* shown on touch phones held upright: the game plays wider in landscape */
+#rotate-hint {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  transform: translateX(-50%);
+  z-index: 10;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px 9px 12px;
+  border-radius: 999px;
+  background: rgba(18, 20, 31, 0.86);
+  border: 1px solid rgba(143, 162, 224, 0.5);
+  color: #eef1ff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+#rotate-hint.show {
+  display: flex;
+}
+#rotate-hint .phone {
+  width: 16px;
+  height: 26px;
+  border: 2px solid #eef1ff;
+  border-radius: 4px;
+  animation: tilt 1.8s ease-in-out infinite;
+}
+#rotate-hint button {
+  all: unset;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+@keyframes tilt {
+  0%, 20% { transform: rotate(0deg); }
+  50%, 70% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
 }
 
 #stage canvas {
