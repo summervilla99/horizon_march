@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vercel/
+.DS_Store
+*.log
+.env
+.env.*
+# 사용자 개인 설정
+.claude/settings.local.json
+# 원작 대본 PDF 등 저작물은 저장소에 올리지 않음
+*.pdf
