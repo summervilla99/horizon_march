@@ -75,8 +75,18 @@ hintEl?.querySelector('button')?.addEventListener('click', () => {
   hintDismissed = true
   hintEl.classList.remove('show')
 })
+let hintTimer: number | undefined
 function updateRotateHint(portrait: boolean) {
-  hintEl?.classList.toggle('show', portrait && layout.touch && !hintDismissed)
+  const show = portrait && layout.touch && !hintDismissed
+  hintEl?.classList.toggle('show', show)
+  window.clearTimeout(hintTimer)
+  // it's a nudge, not a wall: fade it away on its own so it never covers the ☰ button for long
+  if (show) {
+    hintTimer = window.setTimeout(() => {
+      hintDismissed = true
+      hintEl?.classList.remove('show')
+    }, 6000)
+  }
 }
 updateRotateHint(layout.portrait)
 

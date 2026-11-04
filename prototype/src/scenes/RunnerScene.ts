@@ -166,6 +166,8 @@ export class RunnerScene extends Phaser.Scene {
     this.invuln = Math.max(0, this.invuln - dt)
     const v = (BASE_SPEED - this.attempt * 14) * (this.slow > 0 ? 0.45 : 1)
     this.runner.x += v * dt
+    // lean into the run (the art is a standing pose, so the lean + bob sells the sprint); jumps keep their own tilt
+    this.runner.rot = this.runner.offY === 0 ? 0.13 : 0.05
     this.runner.setAlpha(this.invuln > 0 ? 0.5 + 0.5 * Math.sin(time / 40) : 1)
     followCameraX(this, this.runner.x + layout.viewW * 0.2, this.worldW, 0.18)
 
@@ -219,6 +221,7 @@ export class RunnerScene extends Phaser.Scene {
     this.state = 'caught'
     this.offAction?.()
     this.runner.marching = false
+    this.runner.rot = 0
     this.runner.tint(0xff9a9a)
     this.cameras.main.shake(260, 0.01)
     this.attempt++
@@ -230,6 +233,7 @@ export class RunnerScene extends Phaser.Scene {
     this.offAction?.()
     this.hud.clear()
     this.runner.marching = false
+    this.runner.rot = 0
     this.runner.stop()
     this.chasers.forEach((c) => c.setVisible(false))
     this.cameras.main.flash(300, 255, 255, 255)

@@ -532,14 +532,16 @@ export const part2: ChapterDef[] = [
         stage: 'harbor',
         async play(s) {
           const cast = [
-            ['yasuda', 0.18], ['ganemura', 0.28], ['gangseong', 0.38], ['sunju', 0.48],
-            ['akiko', 0.58], ['masayo', 0.68], ['megumi', 0.78], ['cheongok', 0.88],
+            ['yasuda', 0.22], ['ganemura', 0.32], ['gangseong', 0.42], ['sunju', 0.52],
+            ['akiko', 0.62], ['masayo', 0.72], ['megumi', 0.82], ['cheongok', 0.92],
           ] as const
           await s.caption('청옥이 야스다를 잡으러 쫓아가고, 야스다는 도망친다. 서로를 쫓으며 달리는 사람들.', 3000)
           cast.forEach(([id, f], i) => s.put(id, f, { face: 'right', lane: 440 + (i % 3) * 22 }))
           // the old men are watching from the back, a little ghostly
-          const yo = s.put('yasudaOld', 0.9, { face: 'left', lane: 418 })
-          const go = s.put('ganemuraOld', 0.97, { face: 'left', lane: 418 })
+          const yo = s.put('yasudaOld', 0.07, { face: 'right', lane: 418 })
+          const go = s.put('ganemuraOld', 0.14, { face: 'right', lane: 418 })
+          yo.setLabelVisible(false)
+          go.setLabelVisible(false)
           yo.setAlpha(0.65)
           go.setAlpha(0.65)
           yo.scaleMul = 0.9

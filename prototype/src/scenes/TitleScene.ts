@@ -56,7 +56,7 @@ export class TitleScene extends Phaser.Scene {
     buildHarborBackdrop(this, 'morning')
 
     for (const [id, f] of LINEUP) {
-      const a = new Actor(this, ACTORS[id], Math.round(layout.viewW * (layout.portrait ? 0.1 + f * 0.9 : 0.04 + f * 0.8)), FEET_Y + (id === 'cheongok' ? 24 : 0))
+      const a = new Actor(this, ACTORS[id], Math.round(layout.viewW * (layout.portrait ? 0.1 + f * 0.9 : 0.03 + f * 0.7)), FEET_Y + (id === 'cheongok' ? 24 : 0))
       a.face(f > 0.4 ? 'left' : 'right')
       a.setLabelVisible(false)
       this.actors.push(a)
@@ -71,7 +71,7 @@ export class TitleScene extends Phaser.Scene {
     })
 
     const cx = layout.viewW / 2
-    const top = layout.safeT + margin() + (layout.portrait ? 70 : 28)
+    const top = layout.safeT + margin() + (layout.portrait ? 96 : 28)
     const shadowStyle = { stroke: '#2a1a10', strokeThickness: 8 }
     this.add
       .text(cx, top, '호라이즌 마치', { fontSize: fs(layout.portrait ? 46 : 58), color: '#fff0c8', fontStyle: 'bold', ...shadowStyle })
@@ -91,7 +91,7 @@ export class TitleScene extends Phaser.Scene {
   private buildButtons() {
     const saved = savedProgress()
     const hasSave = saved > 0
-    const w = Math.min(layout.viewW - margin() * 2, layout.portrait ? 320 : 280)
+    const w = Math.min(layout.viewW - margin() * 2, layout.portrait ? 320 : 250)
     const h = Math.round(touchMin() * 1.1)
     const gap = 12
     const items: { label: string; fill: string; stroke: string; run: () => void }[] = []
@@ -105,7 +105,7 @@ export class TitleScene extends Phaser.Scene {
     if (hasSave) {
       const ch = FLAT[saved]?.chapter
       items.push({
-        label: `이어하기 — ${ch?.no ?? 1}장 ${ch?.title ?? ''}`,
+        label: `이어하기 · ${ch?.no ?? 1}장`,
         fill: '#2d4a6b',
         stroke: '#9ec8f5',
         run: () => void this.begin(saved),
@@ -117,7 +117,7 @@ export class TitleScene extends Phaser.Scene {
 
     const total = items.length * h + (items.length - 1) * gap
     const x = layout.portrait ? layout.viewW / 2 : layout.viewW - layout.safeR - margin() - w / 2
-    const bottom = layout.viewH - layout.safeB - margin()
+    const bottom = layout.viewH - layout.safeB - margin() - 18
     const startY = layout.portrait ? bottom - total : Math.max(layout.safeT + 170, layout.viewH / 2 - total / 2 + 60)
     items.forEach((it, i) => {
       new Button(this, {
