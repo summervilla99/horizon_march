@@ -79,15 +79,11 @@ export const part1: ChapterDef[] = [
         id: 'deck',
         stage: 'deck',
         async play(s) {
-          await s.card('60년 전', '시대는 1930년대 후반', 2200)
+          await s.card('60년 전', '시대는 1930년대 후반', 1100)
           const y = s.put('yasuda', 0.3, { face: 'right', lane: 470 })
           const g = s.put('ganemura', 0.46, { face: 'left', lane: 470 })
-          await s.talk([
-            ['야스다', '이토 히로부미 대신 네가 저격 당했으면 좋겠다!'],
-            ['가네무라', '너나 저격당해라.'],
-          ])
           void Promise.all([y.shake(5, 500), g.shake(5, 500)])
-          s.caption('배 위. 붐비는 승객들. 희망을 품고 술렁거린다.', 2600)
+          void s.caption('배 위. 붐비는 승객들. 희망을 품고 술렁거린다.', 2600)
           const gs = s.enter('gangseong', 0.66, 'right', { speed: 300, lane: 478 })
           const sj = s.enter('sunju', 0.8, 'right', { speed: 300, lane: 462 })
           await Promise.all([gs, sj])
@@ -253,14 +249,36 @@ export const part1: ChapterDef[] = [
             ['야스다', '난, 혼자 사니까 이런 거 안 먹어도 돼요. 어려울 때는 서로 도와야죠.'],
             ['아키코', '(…) 고맙습니다.'],
           ])
-          s.flash(0xffe0e8, 500)
-          await s.say('', '아키코가 야스다의 손과 포장을 겹쳐 잡는다. 야스다, 당황하며 재빨리 일어난다.')
-          await s.talk([
-            ['야스다', '나, 갈게요.'],
-            ['아키코', '정말 고마워요.'],
-          ])
-          void a.hop(10, 200)
-          await y.walkTo(s.fx(-0.1), 260)
+          // Akiko steps closer, reaching for his hand — the player decides what Yasuda does
+          await s.caption('아키코가 한 걸음, 두 걸음 다가온다. 야스다의 손과 포장에 손을 뻗는다…', 1800)
+          await a.walkTo(y.x + 52, 70)
+          void a.hop(6, 200)
+          const pick = await s.choose('야스다', '(아키코의 손이 닿으려 한다!)', ['1. 가만히 있기', '2. 부끄러워서 피하기'])
+          if (pick === 0) {
+            s.flash(0xffe0e8, 500)
+            void y.shake(3, 600)
+            await s.say('', '아키코가 야스다의 손과 포장을 겹쳐 잡는다. 야스다, 얼굴이 새빨개진다…')
+            await s.talk([
+              ['야스다', '나, 나, 나 갈게요!'],
+              ['아키코', '정말 고마워요.'],
+            ])
+            void a.hop(10, 200)
+            y.face('left')
+            await y.walkTo(s.fx(-0.1), 260)
+          } else {
+            y.face('left')
+            void y.hop(26, 220)
+            await y.walkTo(y.x - 70, 360)
+            a.face('right')
+            await s.say('', '아키코의 손이 허공을 갈랐다. 야스다는 부끄러워 한 발 물러났다.')
+            await s.talk([
+              ['야스다', '아, 아니, 그게, 저는, 그, 갈게요!'],
+              ['아키코', '아… 죄, 죄송해요! 저, 저도 이만!'],
+            ])
+            void a.shake(4, 300)
+            void y.walkTo(s.fx(-0.1), 380)
+            await a.walkTo(s.fx(1.15), 330)
+          }
           s.remove('akiko')
           await s.sepia(true, 800)
           await s.talk([
@@ -294,33 +312,16 @@ export const part1: ChapterDef[] = [
           void c.hop(20, 200)
           s.shakeCam(240, 0.006)
           await s.say('청옥', '어서 와! 고생했어!')
-          await s.caption('청옥이 밥을 잔뜩 담은 그릇을 들고 튀어나온다! 서둘러 도망쳐야 한다 — 탭탭!', 2400)
-          y.flip = true
-          const startY = y.x
-          const startC = c.x
-          const p = await s.mash({
-            title: '도망쳐!',
-            hint: '탭탭탭! 밥 먹이려는 청옥에게서 도망가자',
-            seconds: 6,
-            goal: 16,
-            button: '도망!',
-            onTap: (pr) => {
-              y.x = startY - (startY - s.fx(0.1)) * pr
-              c.x = startC - (startC - s.fx(0.34)) * pr * 0.92
-              void y.hop(10, 90)
-              c.marching = true
-            },
-          })
-          c.marching = false
-          if (p < 1) {
-            await s.say('청옥', '밥은 먹고 가!')
-            await c.walkTo(y.x + 70, 400)
-            await s.say('야스다', '으억! ...잘 먹겠습니다.')
-            void y.fall(-1, 40)
-            await s.wait(900)
-          } else {
+          await y.walkTo(s.fx(0.26), 160)
+          y.face('right')
+          await s.caption('청옥이 밥그릇을 닥치는 대로 던진다! 날아오는 밥에 맞춰 점프해서 피하자!', 2600)
+          const r = await s.rice({ leader: y, thrower: c })
+          if (r.dodged >= Math.ceil(r.total / 2)) {
             await s.say('청옥', '밥은 먹고 가!!')
-            await c.walkTo(c.x + 30, 100)
+            await s.say('야스다', '안 먹어! 안 먹는다고!')
+          } else {
+            await s.say('청옥', '밥은 먹고 가!')
+            await s.say('야스다', '으억! 얼굴에 밥이... ...잘 먹었습니다.')
           }
           c.face('right')
           await s.exit('cheongok', 'right', 140)

@@ -39,10 +39,10 @@ export interface ActorDef {
 
 export const ACTORS: Record<ActorId, ActorDef> = {
   yasuda: { id: 'yasuda', name: '야스다', art: yasudaArt, color: '#ffe9b3' },
-  yasudaOld: { id: 'yasudaOld', name: '야스다(노)', art: yasudaOldArt, color: '#d9d2c2', hunch: 0.07, height: 0.97 },
+  yasudaOld: { id: 'yasudaOld', name: '야스다(노)', art: yasudaOldArt, color: '#d9d2c2' },
   yasudaArmy: { id: 'yasudaArmy', name: '야스다', art: yasudaArmyArt, color: '#d5e3a4' },
   ganemura: { id: 'ganemura', name: '가네무라', art: ganemuraArt, color: '#b7e6b2' },
-  ganemuraOld: { id: 'ganemuraOld', name: '가네무라(노)', art: ganemuraOldArt, color: '#d9d2c2', hunch: 0.07, height: 0.97 },
+  ganemuraOld: { id: 'ganemuraOld', name: '가네무라(노)', art: ganemuraOldArt, color: '#d9d2c2' },
   gangseong: { id: 'gangseong', name: '강성', art: gangseongArt, color: '#c7cbe8' },
   sunju: { id: 'sunju', name: '순주', art: sunjuArt, color: '#ead9b0' },
   cheongok: { id: 'cheongok', name: '청옥', art: cheongokArt, color: '#ff9b9b' },

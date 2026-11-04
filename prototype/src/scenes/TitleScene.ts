@@ -9,12 +9,14 @@ import { buildHarborBackdrop } from '../scenery/HarborBackdrop'
 import { Button, touchMin } from '../ui/Button'
 
 const LINEUP: [ActorId, number][] = [
-  ['yasuda', 0.12],
-  ['ganemura', 0.24],
-  ['gangseong', 0.36],
-  ['sunju', 0.48],
-  ['akiko', 0.6],
-  ['cheongok', 0.72],
+  ['yasuda', 0.06],
+  ['ganemura', 0.17],
+  ['gangseong', 0.28],
+  ['sunju', 0.39],
+  ['akiko', 0.5],
+  ['masayo', 0.61],
+  ['megumi', 0.72],
+  ['cheongok', 0.83],
 ]
 
 export class TitleScene extends Phaser.Scene {
@@ -56,8 +58,8 @@ export class TitleScene extends Phaser.Scene {
     buildHarborBackdrop(this, 'morning')
 
     for (const [id, f] of LINEUP) {
-      const a = new Actor(this, ACTORS[id], Math.round(layout.viewW * (layout.portrait ? 0.1 + f * 0.9 : 0.03 + f * 0.7)), FEET_Y + (id === 'cheongok' ? 24 : 0))
-      a.face(f > 0.4 ? 'left' : 'right')
+      const a = new Actor(this, ACTORS[id], Math.round(layout.viewW * (layout.portrait ? 0.08 + f * 0.88 : 0.03 + f * 0.64)), FEET_Y + (id === 'cheongok' ? 24 : id === 'masayo' ? 14 : id === 'megumi' ? -8 : 0))
+      a.face(f > 0.45 ? 'left' : 'right')
       a.setLabelVisible(false)
       this.actors.push(a)
     }

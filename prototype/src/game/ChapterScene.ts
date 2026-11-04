@@ -13,6 +13,7 @@ import { buildStage } from './stages'
 import { drumChallenge, type DrumOpts } from '../minigames/DrumChallenge'
 import { timingBar, type TimingOpts } from '../minigames/TimingBar'
 import { tapMash, type MashOpts } from '../minigames/TapMash'
+import { riceDodge, type RiceOpts } from '../minigames/RiceDodge'
 
 const CARD_DEPTH = 1500
 const MENU_DEPTH = 1400
@@ -375,6 +376,9 @@ export class ChapterScene extends Phaser.Scene {
 
   drum(o: DrumOpts) {
     return drumChallenge(this, o)
+  }
+  rice(o: RiceOpts) {
+    return riceDodge(this, o)
   }
   timing(o: TimingOpts) {
     return timingBar(this, o)
